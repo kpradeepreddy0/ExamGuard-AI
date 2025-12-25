@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ExamGuard AI — Secure Examination</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<!-- BACKGROUND -->
+<div class="ambient"></div>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="brand">
+    <span class="live"></span>
+    ExamGuard <strong>AI</strong>
+  </div>
+
+  <div class="header-center">
+    Secure Exam Environment
+  </div>
+
+  <div class="header-actions">
+    <span class="timer">⏱ <span id="timer">30:00</span></span>
+    <button onclick="document.documentElement.requestFullscreen()">Fullscreen</button>
+    <a href="/" class="exit">Exit</a>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main class="container">
+
+  <!-- LEFT PANEL -->
+  <aside class="sidebar">
+    <h3>Live AI Monitoring</h3>
+
+    <div class="row">
+      <span>Face</span>
+      <b id="faceStatus" class="ok">Detected</b>
+    </div>
+
+    <div class="row">
+      <span>Head Orientation</span>
+      <b id="moveStatus" class="ok">Stable</b>
+    </div>
+
+    <div class="row">
+      <span>Phone</span>
+      <b id="phoneStatus" class="ok">None</b>
+    </div>
+
+    <div class="row danger">
+      <span>Violations</span>
+      <b id="misCount">0</b>
+    </div>
+
+    <p class="hint">
+      AI continuously verifies identity, posture,
+      and environmental compliance.
+    </p>
+  </aside>
+
+  <!-- CAMERA -->
+  <section class="camera">
+    <div class="frame">
+      <video id="video" autoplay muted></video>
+      <canvas id="overlay"></canvas>
+
+      <div id="warning" class="warning">
+        ⚠ Suspicious activity detected
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Face Detection -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/face_detection.js"></script>
+
+<!-- ✅ PHONE DETECTION (WORKING MODEL) -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+
+<!-- Your JS -->
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+</body>
+</html>
