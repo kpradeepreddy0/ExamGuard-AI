@@ -31,27 +31,40 @@ ExamGuard-AI is a real-time AI-based proctoring system designed to monitor onlin
 ## 📁 Project Structure
 
 ExamGuard-AI/
+│
 ├── ai/
-│ ├── face_detection.py
-│ ├── eye_detection.py
+│   ├── face_detection.py
+│   ├── eye_detection.py
 │
 ├── static/
-│ ├── css/
-│ │ ├── style.css
-│ │ └── login.css
-│ ├── js/
-│ │ ├── script.js
-│ │ ├── login.js
-│ │ └── exam.js
+│   ├── css/
+│   │   ├── style.css
+│   │   └── login.css
+│   │
+│   ├── js/
+│   │   ├── script.js
+│   │   ├── exam.js
+│   │   └── login.js
 │
 ├── templates/
-│ ├── index.html
-│ └── login.html
+│   ├── index.html
+│   └── login.html
 │
 ├── phone_detection.py
 ├── app.py
 ├── requirements.txt
 ├── README.md
+
+ 
+ 
+ short explanation
+
+📁 ai/              → AI & computer vision logic  
+📁 static/          → Frontend CSS & JavaScript  
+📁 templates/       → HTML templates (Flask)  
+phone_detection.py → YOLOv8 mobile phone detection  
+app.py             → Flask backend server  
+
 
 
 ---
