@@ -30,7 +30,9 @@ ExamGuard-AI is a real-time AI-based proctoring system designed to monitor onlin
 
 ## 📁 Project Structure
 
-<img width="188" height="471" alt="Screenshot 2025-12-26 at 5 52 54 AM" src="https://github.com/user-attachments/assets/9b178ac0-ac9d-4458-99d7-008c17fd53a0" />
+<img width="311" height="541" alt="Screenshot 2025-12-26 at 5 55 25 AM" src="https://github.com/user-attachments/assets/072b4749-9392-42eb-b21a-03c436f888ff" />
+
+
 
  
  
