@@ -5,19 +5,19 @@ ExamGuard-AI is a real-time AI-based proctoring system designed to monitor onlin
 
 ---
 
-## 🚀 Features
+## Features
 
-- 🎥 Real-time webcam monitoring
-- 🧑 Face detection using MediaPipe
-- 📐 Head orientation & stability detection
-- 📱 Mobile phone detection using YOLOv8
-- ⚠️ Misbehavior & violation counter
-- 🖥️ Modern dashboard UI
-- 🌐 Flask-based backend
+-  Real-time webcam monitoring
+-  Face detection using MediaPipe
+-  Head orientation & stability detection
+-  Mobile phone detection using YOLOv8
+-  Misbehavior & violation counter
+-  Modern dashboard UI
+-  Flask-based backend
 
 ---
 
-## 🧠 Technologies Used
+##  Technologies Used
 
 - **Frontend:** HTML, CSS, JavaScript
 - **Backend:** Python, Flask
@@ -28,7 +28,7 @@ ExamGuard-AI is a real-time AI-based proctoring system designed to monitor onlin
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 
 <img width="311" height="541" alt="Screenshot 2025-12-26 at 5 55 25 AM" src="https://github.com/user-attachments/assets/072b4749-9392-42eb-b21a-03c436f888ff" />
 
@@ -48,9 +48,9 @@ app.py             → Flask backend server
 
 ---
 
-## ⚙️ Installation & Setup
+##  Installation & Setup
 
-### 1️⃣ Clone the Repository
+###  Clone the Repository
 ```bash
 git clone https://github.com/kpradeepreddy0/ExamGuard-AI.git
 cd ExamGuard-AI
@@ -84,7 +84,7 @@ Violations are counted in real-time
 
 UI updates status instantly
 
-## ⚠️ Notes
+##  Notes
 
 YOLOv8 model (yolov8n.pt) is automatically downloaded on first run
 
@@ -102,13 +102,13 @@ AI/ML mini project
 
 Online exam monitoring system demo
 
-## 👨‍💻 Author
+##  Author
 
 Pradeep Reddy
 GitHub: https://github.com/kpradeepreddy0
 
 ####
 
-📜 License
+ License
 
 This project is for educational purposes only.
