@@ -60,7 +60,8 @@ This project is designed as a **final year academic project** and runs securely 
 
 ## 📁 Project Structure
 
-<img width="309" height="631" alt="Screenshot 2025-12-28 at 2 12 05 AM" src="https://github.com/user-attachments/assets/6ccd5e53-92c6-48df-8c97-61c327096f86" />
+<img width="313" height="632" alt="Screenshot 2025-12-28 at 2 18 05 AM" src="https://github.com/user-attachments/assets/1bb152ec-734e-4100-8639-e4f7d41452a4" />
+
 
 
 
