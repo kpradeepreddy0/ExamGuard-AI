@@ -9,9 +9,9 @@ import os
 try:
     import phone_detection
     PHONE_DETECTION_AVAILABLE = True
-except:
+except Exception as e:
     PHONE_DETECTION_AVAILABLE = False
-    print("⚠️ Phone detection disabled (deployment mode)")
+    print("⚠️ Phone detection disabled:", e)
 
 # ================= EXAM QUESTIONS =================
 from exam_data import QUESTIONS
@@ -109,7 +109,7 @@ def exam():
         return render_template("index.html")
     return redirect(url_for("login"))
 
-# ================= STEP-2 : EXAM PLATFORM =================
+# ================= EXAM PLATFORM =================
 
 # GET QUESTIONS
 @app.route("/get_questions")
@@ -168,7 +168,7 @@ def logout():
     session.pop("user", None)
     return redirect(url_for("login"))
 
-# ================= RUN (DEPLOYMENT READY) =================
+# ================= RUN (RAILWAY / CLOUD READY) =================
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))
+    port = int(os.environ.get("PORT", 8000))
     app.run(host="0.0.0.0", port=port)
