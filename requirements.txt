@@ -1,4 +1,6 @@
 flask
+gunicorn
 opencv-python-headless
 numpy
-gunicorn
+torch
+ultralytics
