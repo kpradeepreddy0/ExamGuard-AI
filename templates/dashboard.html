@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ExamGuard AI | Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 0;
+        }
+        .dashboard {
+            max-width: 900px;
+            margin: 50px auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        .user {
+            color: #16a085;
+            font-weight: bold;
+        }
+        .actions {
+            margin-top: 30px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            margin: 10px;
+            background: #16a085;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        .btn:hover {
+            background: #13856d;
+        }
+        .logout {
+            background: #e74c3c;
+        }
+        .logout:hover {
+            background: #c0392b;
+        }
+    </style>
+</head>
+<body>
+
+<div class="dashboard">
+    <h1>Welcome to ExamGuard AI</h1>
+    <p>Hello, <span class="user">{{ user }}</span></p>
+
+    <p>
+        This is your secure dashboard.  
+        You can start the exam or logout safely.
+    </p>
+
+    <div class="actions">
+        <a href="/exam" class="btn">Start Exam</a>
+        <a href="/logout" class="btn logout">Logout</a>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,3 +1,4 @@
+// ================= CAMERA & CANVAS =================
 const video = document.getElementById("video");
 const overlay = document.getElementById("overlay");
 const ctx = overlay.getContext("2d");
@@ -8,14 +9,23 @@ const warning = document.getElementById("warning");
 const misCountEl = document.getElementById("misCount");
 const phoneStatus = document.getElementById("phoneStatus");
 
-// Camera
+// ================= CAMERA =================
 navigator.mediaDevices.getUserMedia({ video: true })
   .then(stream => {
     video.srcObject = stream;
-    video.play();
+    video.onloadedmetadata = () => {
+      video.play();
+      syncCanvas();
+    };
   });
 
-// Face Detection
+function syncCanvas() {
+  overlay.width = video.clientWidth;
+  overlay.height = video.clientHeight;
+}
+window.addEventListener("resize", syncCanvas);
+
+// ================= FACE DETECTION =================
 const faceDetection = new FaceDetection({
   locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/${f}`
 });
@@ -27,14 +37,13 @@ faceDetection.setOptions({
 
 // ================= STATE =================
 let baseCenter = null;
-let detecting = false;
 let unstableFrames = 0;
 const REQUIRED_UNSTABLE_FRAMES = 2;
 
 let misbehaviorCount = 0;
 let violationActive = false;
 
-// Phone cache
+// ================= PHONE CACHE =================
 let phoneDetected = false;
 let phoneBox = null;
 
@@ -42,26 +51,20 @@ let phoneBox = null;
 async function pollPhoneDetection() {
   if (!video.videoWidth) return;
 
-  const canvas = document.createElement("canvas");
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
+  const tempCanvas = document.createElement("canvas");
+  tempCanvas.width = video.videoWidth;
+  tempCanvas.height = video.videoHeight;
 
-  const cctx = canvas.getContext("2d");
-  cctx.drawImage(video, 0, 0);
+  const tctx = tempCanvas.getContext("2d");
+  tctx.drawImage(video, 0, 0);
 
-  const blob = await new Promise(resolve =>
-    canvas.toBlob(resolve, "image/png") // 🔴 IMPORTANT
-  );
+  const blob = await new Promise(r => tempCanvas.toBlob(r, "image/png"));
 
   const formData = new FormData();
   formData.append("frame", blob);
 
   try {
-    const res = await fetch("/detect_phone", {
-      method: "POST",
-      body: formData
-    });
-
+    const res = await fetch("/detect_phone", { method: "POST", body: formData });
     const data = await res.json();
     phoneDetected = data.phone;
     phoneBox = data.box;
@@ -70,44 +73,69 @@ async function pollPhoneDetection() {
     phoneBox = null;
   }
 }
-
-// Poll every 700ms
 setInterval(pollPhoneDetection, 700);
 
-// ================= FACE LOOP =================
-async function detectFrame() {
-  if (video.videoWidth && !detecting) {
-    detecting = true;
-    await faceDetection.send({ image: video });
-    detecting = false;
-  }
-  requestAnimationFrame(detectFrame);
-}
-requestAnimationFrame(detectFrame);
+// ================= FACE DETECTION LOOP (STABLE) =================
+setInterval(async () => {
+  if (!video.videoWidth) return;
+  await faceDetection.send({ image: video });
+}, 120); // ~8 FPS (stable)
 
 // ================= DRAW =================
 faceDetection.onResults(results => {
-
-  const rect = video.getBoundingClientRect();
-  const scaleX = rect.width / video.videoWidth;
-  const scaleY = rect.height / video.videoHeight;
-
-  overlay.width = rect.width;
-  overlay.height = rect.height;
   ctx.clearRect(0, 0, overlay.width, overlay.height);
 
   let currentlyUnstable = false;
 
-  // PHONE BOX
+  // ===== FACE STATUS =====
+  if (results.detections.length === 0) {
+    faceStatus.textContent = "Not Found";
+    currentlyUnstable = true;
+  } else if (results.detections.length > 1) {
+    faceStatus.textContent = "Multiple Faces";
+    currentlyUnstable = true;
+  } else {
+    faceStatus.textContent = "Detected";
+  }
+
+  // ===== FACE BOX =====
+  if (results.detections.length === 1) {
+    const box = results.detections[0].boundingBox;
+
+    const cx = box.xCenter * overlay.width;
+    const cy = box.yCenter * overlay.height;
+    const w = box.width * overlay.width;
+    const h = box.height * overlay.height;
+
+    const x = cx - w / 2;
+    const y = cy - h / 2;
+
+    if (!baseCenter) baseCenter = { x: cx, y: cy };
+
+    if (Math.abs(cx - baseCenter.x) > 14 || Math.abs(cy - baseCenter.y) > 14)
+      currentlyUnstable = true;
+
+    ctx.strokeStyle = currentlyUnstable ? "red" : "green";
+    ctx.lineWidth = 4;
+    ctx.strokeRect(x, y, w, h);
+
+    if (!currentlyUnstable) {
+      baseCenter.x = baseCenter.x * 0.9 + cx * 0.1;
+      baseCenter.y = baseCenter.y * 0.9 + cy * 0.1;
+    }
+  }
+
+  // ===== PHONE BOX =====
   if (phoneDetected && phoneBox) {
     phoneStatus.textContent = "Detected";
     phoneStatus.className = "danger";
     currentlyUnstable = true;
 
+    const scaleX = overlay.width / video.videoWidth;
+    const scaleY = overlay.height / video.videoHeight;
     const [x1, y1, x2, y2] = phoneBox;
 
     ctx.strokeStyle = "red";
-    ctx.lineWidth = 4;
     ctx.strokeRect(
       x1 * scaleX,
       y1 * scaleY,
@@ -119,48 +147,7 @@ faceDetection.onResults(results => {
     phoneStatus.className = "ok";
   }
 
-  // FACE STATUS
-  if (results.detections.length === 0) {
-    faceStatus.textContent = "Not Found";
-    currentlyUnstable = true;
-  } else if (results.detections.length > 1) {
-    faceStatus.textContent = "Multiple Faces";
-    currentlyUnstable = true;
-  } else {
-    faceStatus.textContent = "Detected";
-  }
-
-  // FACE BOX
-  if (results.detections.length === 1) {
-    const face = results.detections[0];
-    const box = face.boundingBox;
-
-    const rawX = box.xCenter * video.videoWidth;
-    const rawY = box.yCenter * video.videoHeight;
-
-    const x = rawX * scaleX;
-    const y = rawY * scaleY;
-    const w = box.width * video.videoWidth * scaleX;
-    const h = box.height * video.videoHeight * scaleY;
-
-    if (!baseCenter) baseCenter = { x: rawX, y: rawY };
-
-    const dx = Math.abs(rawX - baseCenter.x);
-    const dy = Math.abs(rawY - baseCenter.y);
-
-    if (dx > 14 || dy > 14) currentlyUnstable = true;
-
-    ctx.strokeStyle = currentlyUnstable ? "red" : "green";
-    ctx.lineWidth = 4;
-    ctx.strokeRect(x - w / 2, y - h / 2, w, h);
-
-    if (!currentlyUnstable) {
-      baseCenter.x = baseCenter.x * 0.9 + rawX * 0.1;
-      baseCenter.y = baseCenter.y * 0.9 + rawY * 0.1;
-    }
-  }
-
-  // VIOLATIONS
+  // ===== VIOLATIONS =====
   if (currentlyUnstable) {
     unstableFrames++;
   } else {
@@ -168,14 +155,41 @@ faceDetection.onResults(results => {
     violationActive = false;
   }
 
-  const isSuspicious = unstableFrames >= REQUIRED_UNSTABLE_FRAMES;
-
-  if (isSuspicious && !violationActive) {
+  if (unstableFrames >= REQUIRED_UNSTABLE_FRAMES && !violationActive) {
     misbehaviorCount++;
     violationActive = true;
     misCountEl.textContent = misbehaviorCount;
   }
 
-  moveStatus.textContent = isSuspicious ? "Suspicious" : "Stable";
-  warning.style.display = isSuspicious ? "block" : "none";
+  moveStatus.textContent = currentlyUnstable ? "Suspicious" : "Stable";
+  warning.style.display = currentlyUnstable ? "block" : "none";
 });
+// ================= EXAM TIMER =================
+let examDuration = 30 * 60; // 30 minutes in seconds
+const timerEl = document.getElementById("timer");
+
+function startExamTimer() {
+  setInterval(() => {
+    if (examDuration <= 0) {
+      alert("Time is up! Exam submitted automatically.");
+      submitExam();
+      return;
+    }
+
+    examDuration--;
+
+    const minutes = Math.floor(examDuration / 60);
+    const seconds = examDuration % 60;
+
+    timerEl.textContent =
+      `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+  }, 1000);
+}
+
+// START TIMER WHEN PAGE LOADS
+startExamTimer();
+
+function submitExam() {
+  alert("Exam submitted successfully!");
+  window.location.href = "/dashboard";
+}

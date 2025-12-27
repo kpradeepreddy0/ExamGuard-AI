@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ExamGuard AI | Login</title>
+    <title>ExamGuard AI | Register</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
 </head>
@@ -12,13 +12,14 @@
 
     <!-- LEFT PANEL -->
     <div class="left-panel">
-        <h2>New here?</h2>
+        <h2>Welcome!</h2>
         <p>
-            Secure AI-based examination system with real-time monitoring.
-            Ensure fairness and integrity in online exams.
+            Create your account to access the secure AI-based
+            examination system.
         </p>
-        <button class="ghost-btn" onclick="window.location.href='/register'">
-            Create Account
+
+        <button class="ghost-btn" onclick="window.location.href='/login'">
+            Already have an account?
         </button>
 
         <div class="illustration">
@@ -28,10 +29,10 @@
 
     <!-- RIGHT PANEL -->
     <div class="right-panel">
-        <h1>Sign in</h1>
+        <h1>Create Account</h1>
 
-        <!-- 🔴 FIXED FORM -->
-        <form method="POST" action="/login">
+        <!-- 🔴 IMPORTANT FORM -->
+        <form method="POST" action="/register">
             <div class="input-box">
                 <input type="text" name="username" placeholder="Username" required>
             </div>
@@ -40,26 +41,16 @@
                 <input type="password" name="password" placeholder="Password" required>
             </div>
 
-            <button type="submit" class="login-btn">LOGIN</button>
+            <button type="submit" class="login-btn">REGISTER</button>
         </form>
 
-        <!-- ✅ REGISTER LINK -->
         <p style="margin-top:15px;">
-            New user?
-            <a href="/register">Create an account</a>
+            Already registered?
+            <a href="/login">Login here</a>
         </p>
-
-        <p class="social-text">Or sign in with</p>
-
-        <div class="social-icons">
-            <span>f</span>
-            <span>G</span>
-            <span>in</span>
-        </div>
     </div>
 
 </div>
 
-<script src="{{ url_for('static', filename='js/login.js') }}"></script>
 </body>
 </html>

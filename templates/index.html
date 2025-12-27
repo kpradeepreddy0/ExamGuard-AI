@@ -9,7 +9,6 @@
 </head>
 <body>
 
-<!-- BACKGROUND -->
 <div class="ambient"></div>
 
 <!-- HEADER -->
@@ -26,65 +25,90 @@
   <div class="header-actions">
     <span class="timer">⏱ <span id="timer">30:00</span></span>
     <button onclick="document.documentElement.requestFullscreen()">Fullscreen</button>
-    <a href="/" class="exit">Exit</a>
+    <a href="/logout" class="exit">Exit</a>
   </div>
 </header>
 
 <!-- MAIN -->
 <main class="container">
 
-  <!-- LEFT PANEL -->
-  <aside class="sidebar">
-    <h3>Live AI Monitoring</h3>
+  <!-- EXAM PLATFORM (LEFT - MAIN) -->
+  <section class="exam-box">
+    <h2>Exam Questions</h2>
 
-    <div class="row">
-      <span>Face</span>
-      <b id="faceStatus" class="ok">Detected</b>
-    </div>
+    <form id="examForm">
+      <p><b>1. What does AI stand for?</b></p>
+      <label><input type="radio" name="q1"> Artificial Intelligence</label><br>
+      <label><input type="radio" name="q1"> Automatic Input</label><br>
+      <label><input type="radio" name="q1"> Advanced Internet</label><br><br>
 
-    <div class="row">
-      <span>Head Orientation</span>
-      <b id="moveStatus" class="ok">Stable</b>
-    </div>
+      <p><b>2. Which language is used for Flask?</b></p>
+      <label><input type="radio" name="q2"> Java</label><br>
+      <label><input type="radio" name="q2"> Python</label><br>
+      <label><input type="radio" name="q2"> C++</label><br><br>
 
-    <div class="row">
-      <span>Phone</span>
-      <b id="phoneStatus" class="ok">None</b>
-    </div>
+      <p><b>3. YOLO is used for?</b></p>
+      <label><input type="radio" name="q3"> Text Processing</label><br>
+      <label><input type="radio" name="q3"> Object Detection</label><br>
+      <label><input type="radio" name="q3"> Networking</label><br>
+    </form>
 
-    <div class="row danger">
-      <span>Violations</span>
-      <b id="misCount">0</b>
-    </div>
+    <button class="submit-btn" onclick="submitExam()">Submit Exam</button>
+  </section>
 
-    <p class="hint">
-      AI continuously verifies identity, posture,
-      and environmental compliance.
-    </p>
-  </aside>
+  <!-- AI MONITORING (RIGHT) -->
+  <section class="monitor-box">
 
-  <!-- CAMERA -->
-  <section class="camera">
-    <div class="frame">
-      <video id="video" autoplay muted></video>
-      <canvas id="overlay"></canvas>
+    <aside class="sidebar">
+      <h3>Live AI Monitoring</h3>
 
-      <div id="warning" class="warning">
-        ⚠ Suspicious activity detected
+      <div class="row">
+        <span>Face</span>
+        <b id="faceStatus" class="ok">Detected</b>
+      </div>
+
+      <div class="row">
+        <span>Head Orientation</span>
+        <b id="moveStatus" class="ok">Stable</b>
+      </div>
+
+      <div class="row">
+        <span>Phone</span>
+        <b id="phoneStatus" class="ok">None</b>
+      </div>
+
+      <div class="row danger">
+        <span>Violations</span>
+        <b id="misCount">0</b>
+      </div>
+
+      <p class="hint">
+        AI continuously verifies identity, posture,
+        and environment.
+      </p>
+    </aside>
+
+    <div class="camera">
+      <div class="frame">
+        <video id="video" autoplay muted></video>
+        <canvas id="overlay"></canvas>
+
+        <div id="warning" class="warning">
+          ⚠ Suspicious activity detected
+        </div>
       </div>
     </div>
+
   </section>
 
 </main>
 
-<!-- Face Detection -->
+<!-- AI LIBS -->
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/face_detection.js"></script>
-
-<!-- ✅ PHONE DETECTION (WORKING MODEL) -->
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0"></script>
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
 
-<!-- Your JS -->
+<!-- MAIN JS -->
 <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 
 </body>
