@@ -1,114 +1,129 @@
-# ExamGuard-AI
-### AI-Powered Online Exam Proctoring System
+# ExamGuard-AI 🛡️  
+### AI-Powered Secure Online Examination System
 
-ExamGuard-AI is a real-time AI-based proctoring system designed to monitor online examinations using computer vision techniques. It detects suspicious behavior such as head movement, multiple faces, and mobile phone usage during exams.
+ExamGuard-AI is a **smart online exam proctoring system** that uses **Artificial Intelligence** to monitor candidates during online examinations.  
+It ensures exam integrity by detecting suspicious activities such as **face absence, head movement, and mobile phone usage**.
 
----
-
-## Features
-
--  Real-time webcam monitoring
--  Face detection using MediaPipe
--  Head orientation & stability detection
--  Mobile phone detection using YOLOv8
--  Misbehavior & violation counter
--  Modern dashboard UI
--  Flask-based backend
+This project is designed as a **final year academic project** and runs securely on **localhost**.
 
 ---
 
-##  Technologies Used
+## 🚀 Features
 
-- **Frontend:** HTML, CSS, JavaScript
-- **Backend:** Python, Flask
-- **AI Models:**
-  - MediaPipe (Face Detection)
-  - YOLOv8 (Phone Detection)
-- **Libraries:** OpenCV, Ultralytics, Flask-CORS
+- 🔐 **User Authentication**
+  - Register & Login system
+  - Secure password hashing (SHA-256)
+  - Session-based access control
+
+- 📝 **Online Exam Platform**
+  - Multiple-choice questions
+  - Timer-based examination
+  - Auto submission support (logic ready)
+
+- 🤖 **AI-Based Proctoring**
+  - Face detection using MediaPipe
+  - Head movement monitoring
+  - Phone detection using YOLO / OpenCV
+  - Live violation counter
+
+- 🎥 **Live Camera Monitoring**
+  - Real-time webcam feed
+  - Face bounding box overlay
+  - Warning alerts for suspicious behavior
+
+- 🎨 **Modern UI**
+  - Glassmorphism design
+  - Dark professional theme
+  - Smooth animations
+  - Responsive layout
 
 ---
 
-##  Project Structure
+## 🛠️ Technologies Used
 
-<img width="311" height="541" alt="Screenshot 2025-12-26 at 5 55 25 AM" src="https://github.com/user-attachments/assets/072b4749-9392-42eb-b21a-03c436f888ff" />
+### Frontend
+- HTML5
+- CSS3 (Glassmorphism UI)
+- JavaScript
+- MediaPipe (Face Detection)
+- TensorFlow.js
+- COCO-SSD
 
+### Backend
+- Python
+- Flask Framework
+- SQLite Database
+- OpenCV
+- NumPy
 
+---
 
- 
- 
- short explanation
+## 📁 Project Structure
 
-📁 ai/              → AI & computer vision logic  
-📁 static/          → Frontend CSS & JavaScript  
-📁 templates/       → HTML templates (Flask)  
-phone_detection.py → YOLOv8 mobile phone detection  
-app.py             → Flask backend server  
-
+![alt text](<Screenshot 2025-12-28 at 2.12.05 AM.png>)
 
 
 ---
 
-##  Installation & Setup
+## ⚙️ Installation & Setup (Localhost)
 
-###  Clone the Repository
+### 1️⃣ Clone the Repository
+```bash
 git clone https://github.com/kpradeepreddy0/ExamGuard-AI.git
 cd ExamGuard-AI
-
-## Create Virtual Environment
-python3 -m venv venv
-source venv/bin/activate   # macOS/Linux
-venv\Scripts\activate      # Windows
-
-## Install Dependencies
+2️⃣ Install Dependencies
 pip install -r requirements.txt
 
-## Run the Application
-python3 app.py (Mac)
-python app.py (Windows)
+3️⃣ Run the Application
+python3 app.py
 
-## Open in Browser
-http://127.0.0.1:5000
+4️⃣ Open in Browser
+http://127.0.0.1:8000
 
-## How It Works
+🔑 Application Flow
 
-User logs in to the exam portal
+User opens the link
 
-Webcam starts automatically
+Login / Register
 
-MediaPipe detects face & head movement
+Dashboard access
 
-YOLOv8 detects mobile phones
+Enter exam page
 
-Violations are counted in real-time
+AI monitoring starts automatically
 
-UI updates status instantly
+Exam submission
 
-##  Notes
+📌 Notes
 
-YOLOv8 model (yolov8n.pt) is automatically downloaded on first run
+This project is intended for academic purposes
 
-Webcam permission is required
+Runs on localhost (no deployment required)
 
-Best performance in good lighting
+Deployment-ready structure is implemented
 
-## Academic Use
+AI phone detection is disabled automatically in cloud environments
 
-This project is suitable for:
+🎓 Final Year Project Status
 
-Final year project
+✅ Core functionality completed
 
-AI/ML mini project
+✅ AI monitoring implemented
 
-Online exam monitoring system demo
+✅ Secure authentication
 
-##  Author
+✅ Professional UI
 
-Pradeep Reddy
-GitHub: https://github.com/kpradeepreddy0
+🔄 Deployment optional
 
-####
+👨‍💻 Developer
 
- License
+Pradeep Reddy K
+Final Year Student
+Project: ExamGuard-AI
 
-This project is for educational purposes only.  remove all emojs and symbols
+📜 License
+
+This project is for educational use only.
+
 
