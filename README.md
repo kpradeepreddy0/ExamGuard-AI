@@ -5,10 +5,9 @@ ExamGuard-AI is a real-time AI-based proctoring system designed to monitor onlin
 
 ---
 
-## 🚀 Features
-
-- 🎥 Real-time webcam monitoring
-- 🧑 Face detection using MediaPipe
+##  Features
+ Real-time webcam monitoring
+ Face detection using MediaPipe
 - 📐 Head orientation & stability detection
 - 📱 Mobile phone detection using YOLOv8
 - ⚠️ Misbehavior & violation counter
