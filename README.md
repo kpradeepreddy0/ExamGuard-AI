@@ -1,25 +1,26 @@
-ExamGuard-AI
-AI-Powered Online Exam Proctoring System
+AI-Based Online Exam Proctoring System
 
-ExamGuard-AI is a real-time AI-based online exam proctoring system designed to monitor students during online examinations using computer vision techniques. The system detects suspicious activities such as unusual head movements, the presence of multiple faces, and mobile phone usage during exams.
+ExamGuard-AI is an AI-based online exam proctoring system developed to monitor students during online examinations. The main aim of this project is to reduce cheating in online exams by using computer vision techniques. The system observes the student through a webcam and detects suspicious activities such as head movement, presence of multiple faces, and mobile phone usage during the exam.
+
+This project helps in maintaining fairness and discipline in online examinations without the need for continuous human supervision.
 
 Features
 
-Real-time webcam monitoring
+Real-time webcam monitoring during exams
 
 Face detection using MediaPipe
 
-Head orientation and stability detection
+Detection of head movement and orientation
 
 Mobile phone detection using YOLOv8
 
-Automatic misbehavior and violation counter
+Automatic counting of exam violations
 
-Modern and responsive dashboard user interface
+Simple and user-friendly dashboard
 
-Flask-based backend architecture
+Flask-based backend system
 
-## Technologies Used
+Technologies Used
 Frontend
 
 HTML
@@ -40,7 +41,7 @@ MediaPipe for face detection
 
 YOLOv8 for mobile phone detection
 
-Libraries and Tools
+Libraries
 
 OpenCV
 
@@ -71,79 +72,90 @@ app.py             → Flask backend server
 ---
 
 Installation and Setup
-Clone the Repository
+Step 1: Clone the Repository
 git clone https://github.com/kpradeepreddy0/ExamGuard-AI.git
 cd ExamGuard-AI
 
-Create Virtual Environment
-
-For macOS or Linux:
-
-python3 -m venv venv
-source venv/bin/activate
-
+Step 2: Create Virtual Environment
 
 For Windows:
 
 python -m venv venv
 venv\Scripts\activate
 
-Install Dependencies
+
+For macOS or Linux:
+
+python3 -m venv venv
+source venv/bin/activate
+
+Step 3: Install Required Libraries
 pip install -r requirements.txt
 
-Run the Application
-
-For macOS:
-
-python3 app.py
-
+Step 4: Run the Project
 
 For Windows:
 
 python app.py
 
-Open in Browser
+
+For macOS:
+
+python3 app.py
+
+Step 5: Open in Browser
 http://127.0.0.1:5000
 
-How It Works
+Working of the System
 
-The user logs in to the exam portal
+The student logs in to the exam portal
 
 The webcam starts automatically
 
-MediaPipe detects the face and tracks head movement
+MediaPipe detects the student’s face and tracks head movement
 
-YOLOv8 detects mobile phone usage
+YOLOv8 checks for mobile phone usage
 
-Violations are counted in real time
+Any suspicious activity is counted as a violation
 
-The user interface updates the status instantly
+The exam status is updated in real time on the dashboard
 
-Notes
+Advantages
 
-The YOLOv8 model file (yolov8n.pt) is automatically downloaded during the first run
+Reduces cheating in online exams
 
-Webcam access permission is required for proper functioning
+Works automatically without human monitoring
 
-Best performance is achieved under good lighting conditions
+Easy to use and understand
 
-Academic Use
+Suitable for remote examinations
 
-This project is suitable for:
+Limitations
 
-Final year engineering projects
+Requires good lighting conditions
 
-AI and Machine Learning mini projects
+Performance depends on webcam quality
 
-Online exam monitoring system demonstrations
+Internet connection is required
+
+Applications
+
+Final year academic project
+
+Online examination monitoring
+
+AI and Machine Learning demonstrations
+
+Conclusion
+
+ExamGuard-AI is a useful system for monitoring online exams using artificial intelligence. It helps in detecting suspicious activities and maintaining exam integrity. This project demonstrates the practical use of AI and computer vision in real-world applications.
 
 Author
 
 Pradeep Reddy
-GitHub: https://github.com/kpradeepredd0
 
 License
 
-This project is developed for educational purposes only.
+This project is developed only for educational purposes.
 
 
