@@ -3,17 +3,23 @@ import sqlite3
 import hashlib
 import cv2
 import numpy as np
+import os
 
-# 🔹 IMPORT PHONE DETECTION MODULE
-import phone_detection
+# ================= SAFE PHONE DETECTION IMPORT =================
+try:
+    import phone_detection
+    PHONE_DETECTION_AVAILABLE = True
+except:
+    PHONE_DETECTION_AVAILABLE = False
+    print("⚠️ Phone detection disabled (deployment mode)")
 
-# 🔹 IMPORT EXAM QUESTIONS
+# ================= EXAM QUESTIONS =================
 from exam_data import QUESTIONS
 
 app = Flask(__name__)
 app.secret_key = "examguard_secret_key"
 
-# ---------------- DATABASE ----------------
+# ================= DATABASE =================
 DB_NAME = "users.db"
 
 def get_db_connection():
@@ -35,7 +41,7 @@ def create_users_table():
 
 create_users_table()
 
-# ---------------- ROUTES ----------------
+# ================= ROUTES =================
 
 # HOME → LOGIN
 @app.route("/")
@@ -96,7 +102,7 @@ def dashboard():
         return render_template("dashboard.html", user=session["user"])
     return redirect(url_for("login"))
 
-# -------- EXAM (PROTECTED AI PAGE) --------
+# -------- EXAM PAGE --------
 @app.route("/exam")
 def exam():
     if "user" in session:
@@ -105,14 +111,14 @@ def exam():
 
 # ================= STEP-2 : EXAM PLATFORM =================
 
-# 🔹 GET EXAM QUESTIONS
+# GET QUESTIONS
 @app.route("/get_questions")
 def get_questions():
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
     return jsonify(QUESTIONS)
 
-# 🔹 SUBMIT EXAM
+# SUBMIT EXAM
 @app.route("/submit_exam", methods=["POST"])
 def submit_exam():
     if "user" not in session:
@@ -134,6 +140,9 @@ def submit_exam():
 # ================= PHONE DETECTION API =================
 @app.route("/detect_phone", methods=["POST"])
 def detect_phone_api():
+    if not PHONE_DETECTION_AVAILABLE:
+        return jsonify({"phone": False, "box": None})
+
     if "frame" not in request.files:
         return jsonify({"phone": False, "box": None})
 
@@ -159,6 +168,7 @@ def logout():
     session.pop("user", None)
     return redirect(url_for("login"))
 
-# ---------------- RUN ----------------
+# ================= RUN (DEPLOYMENT READY) =================
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
