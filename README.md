@@ -51,7 +51,6 @@ app.py             → Flask backend server
 ##  Installation & Setup
 
 ###  Clone the Repository
-```bash
 git clone https://github.com/kpradeepreddy0/ExamGuard-AI.git
 cd ExamGuard-AI
 
@@ -111,4 +110,5 @@ GitHub: https://github.com/kpradeepreddy0
 
  License
 
-This project is for educational purposes only.
+This project is for educational purposes only.  remove all emojs and symbols
+
