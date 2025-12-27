@@ -1,29 +1,52 @@
-# ExamGuard-AI
-### AI-Powered Online Exam Proctoring System
+ExamGuard-AI
+AI-Powered Online Exam Proctoring System
 
-ExamGuard-AI is a real-time AI-based proctoring system designed to monitor online examinations using computer vision techniques. It detects suspicious behavior such as head movement, multiple faces, and mobile phone usage during exams.
+ExamGuard-AI is a real-time AI-based online exam proctoring system designed to monitor students during online examinations using computer vision techniques. The system detects suspicious activities such as unusual head movements, the presence of multiple faces, and mobile phone usage during exams.
 
----
+Features
 
-##  Features
- Real-time webcam monitoring
- Face detection using MediaPipe
-- 📐 Head orientation & stability detection
-- 📱 Mobile phone detection using YOLOv8
-- ⚠️ Misbehavior & violation counter
-- 🖥️ Modern dashboard UI
-- 🌐 Flask-based backend
+Real-time webcam monitoring
 
----
+Face detection using MediaPipe
 
-## 🧠 Technologies Used
+Head orientation and stability detection
 
-- **Frontend:** HTML, CSS, JavaScript
-- **Backend:** Python, Flask
-- **AI Models:**
-  - MediaPipe (Face Detection)
-  - YOLOv8 (Phone Detection)
-- **Libraries:** OpenCV, Ultralytics, Flask-CORS
+Mobile phone detection using YOLOv8
+
+Automatic misbehavior and violation counter
+
+Modern and responsive dashboard user interface
+
+Flask-based backend architecture
+
+## Technologies Used
+Frontend
+
+HTML
+
+CSS
+
+JavaScript
+
+Backend
+
+Python
+
+Flask
+
+AI Models
+
+MediaPipe for face detection
+
+YOLOv8 for mobile phone detection
+
+Libraries and Tools
+
+OpenCV
+
+Ultralytics
+
+Flask-CORS
 
 ---
 
@@ -47,67 +70,80 @@ app.py             → Flask backend server
 
 ---
 
-## ⚙️ Installation & Setup
-
-### 1️⃣ Clone the Repository
-```bash
+Installation and Setup
+Clone the Repository
 git clone https://github.com/kpradeepreddy0/ExamGuard-AI.git
 cd ExamGuard-AI
 
-## Create Virtual Environment
-python3 -m venv venv
-source venv/bin/activate   # macOS/Linux
-venv\Scripts\activate      # Windows
+Create Virtual Environment
 
-## Install Dependencies
+For macOS or Linux:
+
+python3 -m venv venv
+source venv/bin/activate
+
+
+For Windows:
+
+python -m venv venv
+venv\Scripts\activate
+
+Install Dependencies
 pip install -r requirements.txt
 
-## Run the Application
-python3 app.py (Mac)
-python app.py (Windows)
+Run the Application
 
-## Open in Browser
+For macOS:
+
+python3 app.py
+
+
+For Windows:
+
+python app.py
+
+Open in Browser
 http://127.0.0.1:5000
 
-## How It Works
+How It Works
 
-User logs in to the exam portal
+The user logs in to the exam portal
 
-Webcam starts automatically
+The webcam starts automatically
 
-MediaPipe detects face & head movement
+MediaPipe detects the face and tracks head movement
 
-YOLOv8 detects mobile phones
+YOLOv8 detects mobile phone usage
 
-Violations are counted in real-time
+Violations are counted in real time
 
-UI updates status instantly
+The user interface updates the status instantly
 
-## ⚠️ Notes
+Notes
 
-YOLOv8 model (yolov8n.pt) is automatically downloaded on first run
+The YOLOv8 model file (yolov8n.pt) is automatically downloaded during the first run
 
-Webcam permission is required
+Webcam access permission is required for proper functioning
 
-Best performance in good lighting
+Best performance is achieved under good lighting conditions
 
-## Academic Use
+Academic Use
 
 This project is suitable for:
 
-Final year project
+Final year engineering projects
 
-AI/ML mini project
+AI and Machine Learning mini projects
 
-Online exam monitoring system demo
+Online exam monitoring system demonstrations
 
-## 👨‍💻 Author
+Author
 
 Pradeep Reddy
-GitHub: https://github.com/kpradeepreddy0
+GitHub: https://github.com/kpradeepredd0
 
-####
+License
 
-📜 License
+This project is developed for educational purposes only.
 
-This project is for educational purposes only.
+
