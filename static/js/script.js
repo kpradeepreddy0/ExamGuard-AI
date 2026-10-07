@@ -50,6 +50,9 @@ const REQUIRED_UNSTABLE_FRAMES = 2;
 
 let misbehaviorCount = 0;
 let violationActive = false;
+let phoneDetectionCount = 0;
+let phonePollInProgress = false;
+let examTerminated = false;
 
 // ================= PHONE CACHE =================
 let phoneDetected = false;
@@ -60,7 +63,8 @@ const PHONE_MEMORY_MS = 2500;
 
 // ================= PHONE DETECTION =================
 async function pollPhoneDetection() {
-  if (!video.videoWidth) return;
+  if (!video.videoWidth || phonePollInProgress || examTerminated) return;
+  phonePollInProgress = true;
 
   const tempCanvas = document.createElement("canvas");
   tempCanvas.width = video.videoWidth;
@@ -69,14 +73,15 @@ async function pollPhoneDetection() {
   const tctx = tempCanvas.getContext("2d");
   tctx.drawImage(video, 0, 0);
 
-  const blob = await new Promise(resolve =>
-    tempCanvas.toBlob(resolve, "image/jpeg", 0.8)
-  );
-
-  const formData = new FormData();
-  formData.append("frame", blob);
-
   try {
+    const blob = await new Promise(resolve =>
+      tempCanvas.toBlob(resolve, "image/jpeg", 0.8)
+    );
+    if (!blob || examTerminated) return;
+
+    const formData = new FormData();
+    formData.append("frame", blob);
+
     const res = await fetch("/detect_phone", {
       method: "POST",
       body: formData
@@ -87,6 +92,21 @@ async function pollPhoneDetection() {
     console.log("Phone API:", data);
 
     if (data.phone) {
+      if (!phoneDetected) {
+        phoneDetectionCount++;
+
+        if (phoneDetectionCount >= 4) {
+          examTerminated = true;
+          const stream = video.srcObject;
+          if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+          }
+          alert("Exam ended: a mobile phone was detected 4 times.");
+          window.location.href = "/logout";
+          return;
+        }
+      }
+
       phoneDetected = true;
       phoneBox = data.box;
       phoneLastSeen = Date.now();
@@ -100,6 +120,8 @@ async function pollPhoneDetection() {
 
   } catch (err) {
     console.error("Phone detection failed:", err);
+  } finally {
+    phonePollInProgress = false;
   }
 }
 
@@ -285,7 +307,38 @@ function startExamTimer() {
 startExamTimer();
 
 // ================= SUBMIT =================
-function submitExam() {
-  alert("Exam submitted successfully!");
-  window.location.href = "/dashboard";
+function collectAnswers() {
+  const form = document.getElementById("examForm");
+  const answers = {};
+
+  form.querySelectorAll('input[type="radio"]:checked').forEach((radio) => {
+    answers[String(radio.name)] = radio.value;
+  });
+
+  return answers;
+}
+
+async function submitExam() {
+  const answers = collectAnswers();
+
+  try {
+    const response = await fetch("/submit_exam", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(answers)
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Failed to submit exam");
+    }
+
+    window.location.href = `/result?score=${data.score}&total=${data.total}&percentage=${data.percentage}`;
+  } catch (error) {
+    console.error(error);
+    alert("Unable to submit exam right now. Please try again.");
+  }
 }

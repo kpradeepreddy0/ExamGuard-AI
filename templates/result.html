@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ExamGuard AI | Exam Result</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: #e2e8f0;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .result-card {
+      width: min(520px, 90vw);
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      border-radius: 18px;
+      box-shadow: 0 18px 45px rgba(0,0,0,0.35);
+      padding: 32px 28px;
+      text-align: center;
+    }
+
+    h1 {
+      margin-top: 0;
+      color: #f8fafc;
+      font-size: 2rem;
+    }
+
+    .score {
+      font-size: 3rem;
+      font-weight: 700;
+      margin: 18px 0;
+      color: #34d399;
+    }
+
+    .meta {
+      font-size: 1.05rem;
+      color: #cbd5e1;
+      margin-bottom: 24px;
+    }
+
+    .badge {
+      display: inline-block;
+      background: rgba(52, 211, 153, 0.12);
+      border: 1px solid rgba(52, 211, 153, 0.45);
+      color: #a7f3d0;
+      border-radius: 999px;
+      padding: 8px 16px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 26px;
+    }
+
+    .btn {
+      text-decoration: none;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 22px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .primary {
+      background: #22c55e;
+      color: white;
+    }
+
+    .secondary {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+  </style>
+</head>
+<body>
+  <div class="result-card">
+    <h1>Exam Completed</h1>
+    <div class="badge">{{ user }}</div>
+    <div class="score">{{ score }}/{{ total }}</div>
+    <div class="meta">You scored {{ percentage }}% on the exam.</div>
+
+    <div class="actions">
+      <a href="/dashboard" class="btn primary">Back to Dashboard</a>
+      <a href="/logout" class="btn secondary">Logout</a>
+    </div>
+  </div>
+</body>
+</html>

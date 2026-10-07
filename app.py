@@ -124,7 +124,7 @@ def submit_exam():
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
 
-    data = request.json
+    data = request.get_json(silent=True) or {}
     score = 0
 
     for q in QUESTIONS:
@@ -132,10 +132,37 @@ def submit_exam():
         if qid in data and data[qid] == q["answer"]:
             score += 1
 
+    total = len(QUESTIONS)
+    percentage = round((score / total) * 100, 1) if total else 0
+    session["last_exam_result"] = {
+        "score": score,
+        "total": total,
+        "percentage": percentage
+    }
+
     return jsonify({
         "score": score,
-        "total": len(QUESTIONS)
+        "total": total,
+        "percentage": percentage
     })
+
+# RESULT PAGE
+@app.route("/result")
+def result():
+    if "user" not in session:
+        return redirect(url_for("login"))
+
+    result_data = session.get("last_exam_result", {
+        "score": 0,
+        "total": len(QUESTIONS),
+        "percentage": 0
+    })
+
+    score = int(result_data.get("score", 0))
+    total = int(result_data.get("total", len(QUESTIONS)))
+    percentage = float(result_data.get("percentage", 0))
+
+    return render_template("result.html", user=session["user"], score=score, total=total, percentage=percentage)
 
 # ================= PHONE DETECTION API =================
 @app.route("/detect_phone", methods=["POST"])
@@ -166,6 +193,7 @@ def detect_phone_api():
 @app.route("/logout")
 def logout():
     session.pop("user", None)
+    session.pop("last_exam_result", None)
     return redirect(url_for("login"))
 
 # ================= RUN (RAILWAY / CLOUD READY) =================
