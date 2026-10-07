@@ -128,6 +128,7 @@ Project: ExamGuard-AI
 
 📜 License
 
-This project is for educational use only.
+This project is for educational use only.end
+
 
 
