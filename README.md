@@ -104,9 +104,7 @@ pip install -r requirements.txt
 python3 app.py
 
 Open in browser
-http://127.0.0.1:8000
-
-http://localhost:8000
+https://examguard-ai-three.vercel.app/login
 
 Limitations
 
