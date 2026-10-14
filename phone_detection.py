@@ -3,13 +3,13 @@ from ultralytics import YOLO
 model = YOLO("yolov8n.pt")
 
 
-def detect_phone(frame):
-    results = model(
-        frame,
-        conf=0.30,
-        imgsz=1280,
-        verbose=False
-    )
+results = model(
+    frame,
+    conf=0.25,
+    imgsz=640,
+    verbose=False,
+    device="cpu"
+)
 
     best_phone = None
     best_conf = 0
@@ -23,7 +23,7 @@ def detect_phone(frame):
             label = model.names[cls_id]
             confidence = float(box.conf[0])
 
-            if label != "cell phone" or confidence < 0.35:
+            if label != "cell phone" or confidence < 0.25:
                 continue
 
             x1, y1, x2, y2 = map(int, box.xyxy[0])
