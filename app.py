@@ -1,9 +1,13 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
-import sqlite3
-import hashlib
 import os
+import hashlib
+import secrets
+from urllib.parse import urlparse, urlunparse, parse_qs, urlencode
 
-# Load OpenCV optionally so the main app can start without it
+import psycopg
+from psycopg.rows import dict_row
+
+# ================= OPTIONAL OPENCV =================
 try:
     import cv2
     import numpy as np
@@ -13,124 +17,132 @@ except Exception as e:
     np = None
     OPENCV_AVAILABLE = False
     print("OpenCV unavailable:", e)
-    
-# ================= SAFE PHONE DETECTION IMPORT =================
-try:
-    if OPENCV_AVAILABLE:
+
+# ================= OPTIONAL PHONE DETECTION =================
+phone_detection = None
+PHONE_DETECTION_AVAILABLE = False
+
+if OPENCV_AVAILABLE:
+    try:
         import phone_detection
         PHONE_DETECTION_AVAILABLE = True
-    else:
-        PHONE_DETECTION_AVAILABLE = False
-except Exception as e:
-    PHONE_DETECTION_AVAILABLE = False
-    print("Phone detection disabled:", e)
+    except Exception as e:
+        print("Phone detection disabled:", e)
 
 # ================= EXAM QUESTIONS =================
 from exam_data import QUESTIONS
 
 app = Flask(__name__)
-app.secret_key = "examguard_secret_key"
+app.secret_key = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
 
-# ================= DATABASE =================
-DB_NAME = "users.db"
+# ================= NEON POSTGRESQL =================
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
 
 def get_db_connection():
-    conn = sqlite3.connect(DB_NAME)
-    conn.row_factory = sqlite3.Row
-    return conn
+    if not DATABASE_URL:
+        raise RuntimeError("DATABASE_URL environment variable is not configured")
+
+    # psycopg accepts Neon PostgreSQL URLs directly.
+    return psycopg.connect(DATABASE_URL, row_factory=dict_row)
+
 
 def create_users_table():
-    conn = get_db_connection()
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT UNIQUE NOT NULL,
-            password TEXT NOT NULL
-        )
-    """)
-    conn.commit()
-    conn.close()
+    with get_db_connection() as conn:
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id BIGSERIAL PRIMARY KEY,
+                username TEXT UNIQUE NOT NULL,
+                password TEXT NOT NULL
+            )
+        """)
 
+
+# Create the table during application initialization.
 create_users_table()
 
-# ================= ROUTES =================
 
-# HOME → LOGIN
+# ================= HOME =================
 @app.route("/")
 def index():
     return redirect(url_for("login"))
 
-# -------- REGISTER --------
+
+# ================= REGISTER =================
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
 
+        if not username or not password:
+            return "Username and password are required", 400
+
+        # Keep the existing application's password-hash format.
         hashed_password = hashlib.sha256(password.encode()).hexdigest()
 
         try:
-            conn = get_db_connection()
-            conn.execute(
-                "INSERT INTO users (username, password) VALUES (?, ?)",
-                (username, hashed_password)
-            )
-            conn.commit()
-            conn.close()
+            with get_db_connection() as conn:
+                conn.execute(
+                    "INSERT INTO users (username, password) VALUES (%s, %s)",
+                    (username, hashed_password)
+                )
             return redirect(url_for("login"))
-        except sqlite3.IntegrityError:
-            return "Username already exists"
+
+        except psycopg.errors.UniqueViolation:
+            return "Username already exists", 409
 
     return render_template("register.html")
 
-# -------- LOGIN --------
+
+# ================= LOGIN =================
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
-
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
         hashed_password = hashlib.sha256(password.encode()).hexdigest()
 
-        conn = get_db_connection()
-        user = conn.execute(
-            "SELECT * FROM users WHERE username=? AND password=?",
-            (username, hashed_password)
-        ).fetchone()
-        conn.close()
+        with get_db_connection() as conn:
+            user = conn.execute(
+                "SELECT id, username FROM users WHERE username = %s AND password = %s",
+                (username, hashed_password)
+            ).fetchone()
 
         if user:
-            session["user"] = username
+            session["user"] = user["username"]
             return redirect(url_for("dashboard"))
-        else:
-            return "Invalid username or password"
+
+        return "Invalid username or password", 401
 
     return render_template("login.html")
 
-# -------- DASHBOARD --------
+
+# ================= DASHBOARD =================
 @app.route("/dashboard")
 def dashboard():
     if "user" in session:
         return render_template("dashboard.html", user=session["user"])
     return redirect(url_for("login"))
 
-# -------- EXAM PAGE --------
+
+# ================= EXAM PAGE =================
 @app.route("/exam")
 def exam():
     if "user" in session:
         return render_template("index.html")
     return redirect(url_for("login"))
 
-# ================= EXAM PLATFORM =================
 
-# GET QUESTIONS
+# ================= GET QUESTIONS =================
 @app.route("/get_questions")
 def get_questions():
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
     return jsonify(QUESTIONS)
 
-# SUBMIT EXAM
+
+# ================= SUBMIT EXAM =================
 @app.route("/submit_exam", methods=["POST"])
 def submit_exam():
     if "user" not in session:
@@ -139,13 +151,14 @@ def submit_exam():
     data = request.get_json(silent=True) or {}
     score = 0
 
-    for q in QUESTIONS:
-        qid = str(q["id"])
-        if qid in data and data[qid] == q["answer"]:
+    for question in QUESTIONS:
+        question_id = str(question["id"])
+        if question_id in data and data[question_id] == question["answer"]:
             score += 1
 
     total = len(QUESTIONS)
     percentage = round((score / total) * 100, 1) if total else 0
+
     session["last_exam_result"] = {
         "score": score,
         "total": total,
@@ -158,7 +171,8 @@ def submit_exam():
         "percentage": percentage
     })
 
-# RESULT PAGE
+
+# ================= RESULT PAGE =================
 @app.route("/result")
 def result():
     if "user" not in session:
@@ -174,43 +188,59 @@ def result():
     total = int(result_data.get("total", len(QUESTIONS)))
     percentage = float(result_data.get("percentage", 0))
 
-    return render_template("result.html", user=session["user"], score=score, total=total, percentage=percentage)
+    return render_template(
+        "result.html",
+        user=session["user"],
+        score=score,
+        total=total,
+        percentage=percentage
+    )
+
 
 # ================= PHONE DETECTION API =================
 @app.route("/detect_phone", methods=["POST"])
 def detect_phone_api():
-    if not PHONE_DETECTION_AVAILABLE:
-        return jsonify({"phone": False, "box": None})
+    if not OPENCV_AVAILABLE or not PHONE_DETECTION_AVAILABLE:
+        return jsonify({
+            "phone": False,
+            "box": None,
+            "message": "Phone detection is unavailable on this deployment."
+        })
 
     if "frame" not in request.files:
-        return jsonify({"phone": False, "box": None})
+        return jsonify({"phone": False, "box": None}), 400
 
-    file = request.files["frame"]
-    file.seek(0)
+    try:
+        image_data = request.files["frame"].read()
+        if not image_data:
+            return jsonify({"phone": False, "box": None}), 400
 
-    npimg = np.frombuffer(file.read(), np.uint8)
-    frame = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
+        npimg = np.frombuffer(image_data, np.uint8)
+        frame = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
 
-    if frame is None:
-        return jsonify({"phone": False, "box": None})
+        if frame is None:
+            return jsonify({"phone": False, "box": None}), 400
 
-    phone, box = phone_detection.detect_phone(frame)
+        phone, box = phone_detection.detect_phone(frame)
+        return jsonify({"phone": bool(phone), "box": box})
 
-    return jsonify({
-        "phone": phone,
-        "box": box
-    })
+    except Exception as e:
+        print("Phone detection error:", e)
+        return jsonify({"phone": False, "box": None}), 500
 
-# -------- LOGOUT --------
+
+# ================= LOGOUT =================
 @app.route("/logout")
 def logout():
     session.pop("user", None)
     session.pop("last_exam_result", None)
     return redirect(url_for("login"))
 
-# ================= RUN (RAILWAY / CLOUD READY) =================
+
+# ================= LOCAL DEVELOPMENT =================
 if __name__ == "__main__":
-   app.run(port=8000, debug=True)
-
-
-    
+    app.run(
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", 8000)),
+        debug=False
+    )
