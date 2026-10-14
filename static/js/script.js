@@ -1,4 +1,5 @@
-// ================= CAMERA & CANVAS =================
+
+ // ================= CAMERA & CANVAS =================
 const video = document.getElementById("video");
 const overlay = document.getElementById("overlay");
 const ctx = overlay.getContext("2d");
@@ -10,9 +11,7 @@ const misCountEl = document.getElementById("misCount");
 const phoneStatus = document.getElementById("phoneStatus");
 
 // ================= CAMERA =================
-navigator.mediaDevices.getUserMedia({
-  video: true
-})
+navigator.mediaDevices.getUserMedia({ video: true })
 .then(stream => {
   video.srcObject = stream;
 
@@ -21,9 +20,7 @@ navigator.mediaDevices.getUserMedia({
     syncCanvas();
   };
 })
-.catch(err => {
-  console.error("Camera access failed:", err);
-});
+.catch(err => console.error("Camera access failed:", err));
 
 function syncCanvas() {
   overlay.width = video.clientWidth;
@@ -63,20 +60,34 @@ const PHONE_MEMORY_MS = 2500;
 
 // ================= PHONE DETECTION =================
 async function pollPhoneDetection() {
-  if (!video.videoWidth || phonePollInProgress || examTerminated) return;
+  if (
+    !video.videoWidth ||
+    phonePollInProgress ||
+    examTerminated
+  ) return;
+
   phonePollInProgress = true;
 
   const tempCanvas = document.createElement("canvas");
-  tempCanvas.width = video.videoWidth;
-  tempCanvas.height = video.videoHeight;
+  const scale = Math.min(1, 640 / video.videoWidth);
+
+  tempCanvas.width = Math.round(video.videoWidth * scale);
+  tempCanvas.height = Math.round(video.videoHeight * scale);
 
   const tctx = tempCanvas.getContext("2d");
-  tctx.drawImage(video, 0, 0);
+  tctx.drawImage(
+    video,
+    0,
+    0,
+    tempCanvas.width,
+    tempCanvas.height
+  );
 
   try {
     const blob = await new Promise(resolve =>
-      tempCanvas.toBlob(resolve, "image/jpeg", 0.8)
+      tempCanvas.toBlob(resolve, "image/jpeg", 0.6)
     );
+
     if (!blob || examTerminated) return;
 
     const formData = new FormData();
@@ -87,9 +98,11 @@ async function pollPhoneDetection() {
       body: formData
     });
 
-    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(`Phone API returned ${res.status}`);
+    }
 
-    console.log("Phone API:", data);
+    const data = await res.json();
 
     if (data.phone) {
       if (!phoneDetected) {
@@ -97,10 +110,12 @@ async function pollPhoneDetection() {
 
         if (phoneDetectionCount >= 4) {
           examTerminated = true;
+
           const stream = video.srcObject;
           if (stream) {
             stream.getTracks().forEach(track => track.stop());
           }
+
           alert("Exam ended: a mobile phone was detected 4 times.");
           window.location.href = "/logout";
           return;
@@ -108,11 +123,14 @@ async function pollPhoneDetection() {
       }
 
       phoneDetected = true;
-      phoneBox = data.box;
+
+      if (data.box) {
+        phoneBox = data.box.map(value => value / scale);
+      }
+
       phoneLastSeen = Date.now();
     }
 
-    // keep detection alive briefly
     if (Date.now() - phoneLastSeen > PHONE_MEMORY_MS) {
       phoneDetected = false;
       phoneBox = null;
@@ -125,16 +143,17 @@ async function pollPhoneDetection() {
   }
 }
 
-// Faster polling for smoother detection
 setInterval(pollPhoneDetection, 250);
 
 // ================= FACE DETECTION LOOP =================
 setInterval(async () => {
-  if (!video.videoWidth) return;
+  if (!video.videoWidth || examTerminated) return;
 
-  await faceDetection.send({
-    image: video
-  });
+  try {
+    await faceDetection.send({ image: video });
+  } catch (err) {
+    console.error("Face detection failed:", err);
+  }
 }, 120);
 
 // ================= DRAW & AI MONITORING =================
@@ -142,26 +161,24 @@ faceDetection.onResults(results => {
   ctx.clearRect(0, 0, overlay.width, overlay.height);
 
   let currentlyUnstable = false;
+  const detections = results.detections || [];
 
-  // ================= FACE STATUS =================
-  if (results.detections.length === 0) {
+  if (detections.length === 0) {
     faceStatus.textContent = "Not Found";
     faceStatus.className = "danger";
     currentlyUnstable = true;
-
-  } else if (results.detections.length > 1) {
+  } else if (detections.length > 1) {
     faceStatus.textContent = "Multiple Faces";
     faceStatus.className = "danger";
     currentlyUnstable = true;
-
   } else {
     faceStatus.textContent = "Detected";
     faceStatus.className = "ok";
   }
 
   // ================= FACE BOX =================
-  if (results.detections.length === 1) {
-    const box = results.detections[0].boundingBox;
+  if (detections.length === 1) {
+    const box = detections[0].boundingBox;
 
     const cx = box.xCenter * overlay.width;
     const cy = box.yCenter * overlay.height;
@@ -182,40 +199,29 @@ faceDetection.onResults(results => {
       currentlyUnstable = true;
     }
 
-    ctx.strokeStyle =
-      currentlyUnstable ? "red" : "lime";
-
+    ctx.strokeStyle = currentlyUnstable ? "red" : "lime";
     ctx.lineWidth = 4;
     ctx.strokeRect(x, y, w, h);
 
     if (!currentlyUnstable) {
-      baseCenter.x =
-        baseCenter.x * 0.9 + cx * 0.1;
-
-      baseCenter.y =
-        baseCenter.y * 0.9 + cy * 0.1;
+      baseCenter.x = baseCenter.x * 0.9 + cx * 0.1;
+      baseCenter.y = baseCenter.y * 0.9 + cy * 0.1;
     }
   }
 
   // ================= PHONE DETECTION UI =================
   if (phoneDetected && phoneBox) {
-
     phoneStatus.textContent = "Detected";
     phoneStatus.className = "danger";
-
     currentlyUnstable = true;
 
-    const scaleX =
-      overlay.width / video.videoWidth;
-
-    const scaleY =
-      overlay.height / video.videoHeight;
+    const scaleX = overlay.width / video.videoWidth;
+    const scaleY = overlay.height / video.videoHeight;
 
     const [x1, y1, x2, y2] = phoneBox;
 
     ctx.strokeStyle = "red";
     ctx.lineWidth = 4;
-
     ctx.strokeRect(
       x1 * scaleX,
       y1 * scaleY,
@@ -225,13 +231,7 @@ faceDetection.onResults(results => {
 
     ctx.fillStyle = "red";
     ctx.font = "18px Arial";
-
-    ctx.fillText(
-      "PHONE DETECTED",
-      x1 * scaleX,
-      y1 * scaleY - 10
-    );
-
+    ctx.fillText("PHONE DETECTED", x1 * scaleX, y1 * scaleY - 10);
   } else {
     phoneStatus.textContent = "None";
     phoneStatus.className = "ok";
@@ -251,67 +251,54 @@ faceDetection.onResults(results => {
   ) {
     misbehaviorCount++;
     violationActive = true;
-
-    misCountEl.textContent =
-      misbehaviorCount;
+    misCountEl.textContent = misbehaviorCount;
   }
 
-  // ================= STATUS =================
-  moveStatus.textContent =
-    currentlyUnstable
-      ? "Suspicious"
-      : "Stable";
-
-  moveStatus.className =
-    currentlyUnstable
-      ? "danger"
-      : "ok";
-
-  warning.style.display =
-    currentlyUnstable
-      ? "block"
-      : "none";
+  moveStatus.textContent = currentlyUnstable ? "Suspicious" : "Stable";
+  moveStatus.className = currentlyUnstable ? "danger" : "ok";
+  warning.style.display = currentlyUnstable ? "block" : "none";
 });
 
 // ================= EXAM TIMER =================
 let examDuration = 30 * 60;
-const timerEl =
-  document.getElementById("timer");
+const timerEl = document.getElementById("timer");
+let timerEnded = false;
 
 function startExamTimer() {
-  setInterval(() => {
+  const timerInterval = setInterval(() => {
+    if (examTerminated || timerEnded) {
+      clearInterval(timerInterval);
+      return;
+    }
 
     if (examDuration <= 0) {
-      alert(
-        "Time is up! Exam submitted automatically."
-      );
-
+      timerEnded = true;
+      clearInterval(timerInterval);
+      alert("Time is up! Exam submitted automatically.");
       submitExam();
       return;
     }
 
     examDuration--;
 
-    const minutes =
-      Math.floor(examDuration / 60);
-
-    const seconds =
-      examDuration % 60;
+    const minutes = Math.floor(examDuration / 60);
+    const seconds = examDuration % 60;
 
     timerEl.textContent =
       `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
-
   }, 1000);
 }
 
 startExamTimer();
 
 // ================= SUBMIT =================
+let submitting = false;
+
 function collectAnswers() {
   const form = document.getElementById("examForm");
   const answers = {};
 
-  form.querySelectorAll('input[type="radio"]:checked').forEach((radio) => {
+  form.querySelectorAll('input[type="radio"]:checked').forEach(radio => {
     answers[String(radio.name)] = radio.value;
   });
 
@@ -319,6 +306,9 @@ function collectAnswers() {
 }
 
 async function submitExam() {
+  if (submitting) return;
+  submitting = true;
+
   const answers = collectAnswers();
 
   try {
@@ -336,9 +326,12 @@ async function submitExam() {
       throw new Error(data.error || "Failed to submit exam");
     }
 
-    window.location.href = `/result?score=${data.score}&total=${data.total}&percentage=${data.percentage}`;
+    window.location.href =
+      `/result?score=${data.score}&total=${data.total}&percentage=${data.percentage}`;
+
   } catch (error) {
     console.error(error);
+    submitting = false;
     alert("Unable to submit exam right now. Please try again.");
   }
 }
