@@ -1,17 +1,29 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import sqlite3
 import hashlib
-import cv2
-import numpy as np
 import os
 
+# Load OpenCV optionally so the main app can start without it
+try:
+    import cv2
+    import numpy as np
+    OPENCV_AVAILABLE = True
+except Exception as e:
+    cv2 = None
+    np = None
+    OPENCV_AVAILABLE = False
+    print("OpenCV unavailable:", e)
+    
 # ================= SAFE PHONE DETECTION IMPORT =================
 try:
-    import phone_detection
-    PHONE_DETECTION_AVAILABLE = True
+    if OPENCV_AVAILABLE:
+        import phone_detection
+        PHONE_DETECTION_AVAILABLE = True
+    else:
+        PHONE_DETECTION_AVAILABLE = False
 except Exception as e:
     PHONE_DETECTION_AVAILABLE = False
-    print("⚠️ Phone detection disabled:", e)
+    print("Phone detection disabled:", e)
 
 # ================= EXAM QUESTIONS =================
 from exam_data import QUESTIONS
